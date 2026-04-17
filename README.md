@@ -1,159 +1,90 @@
-# SpecToUI
+# SpecToUI Agent
+### AI-Powered React Component Generator from Product Requirements Documents
 
-Name:Gokul Das M
-Track:Frontend Dev
-Lab Name:Capstone Sandbox — Full Agent Pipeline
-
-> Turn any Product Requirements Document into a complete React component tree — instantly.
-
-SpecToUI is an AI-powered Next.js application where an agentic pipeline reads a PRD, plans a component hierarchy, and generates production-quality TSX code with Tailwind CSS — all streamed live to a 3-panel UI.
+> **Track:** Frontend Dev  
+> **Team Name:** Team Beta  
+> **Team Members:** Gokul Das M, Teenu Jose
 
 ---
 
-## What it does
+## Problem Statement
 
-1. **Paste or upload** a Product Requirements Document (PRD) in the left panel
-2. **Click "Generate UI"** — the AI agent pipeline kicks off automatically
-3. **Watch the Tree View** populate with a live component hierarchy
-4. **Browse generated TSX code** per component in the Code Export panel
-5. **Export as ZIP** — a complete, ready-to-use React component library
+When a developer receives a Product Requirements Document (PRD) from a product manager, they must manually read through it, decide which UI components are needed, plan the component hierarchy, and write all the boilerplate code. For even a medium-sized feature this process takes hours.
+
+**SpecToUI eliminates that entirely.** Paste or upload your PRD, click Generate UI, and an AI agent pipeline reads the document, plans a complete React component tree, and streams production-ready TypeScript + Tailwind CSS code — component by component — in under a minute.
 
 ---
 
-## Agentic Pipeline
+## Team Members & Contributions
 
-This project implements a complete end-to-end agentic pipeline with the following components:
-
-### Agents
-
-**PlannerAgent** (`src/lib/agents/PlannerAgent.ts`)
-- Receives the raw PRD text
-- Uses Groq tool-calling to validate PRD quality, suggest layout patterns, and search NPM for relevant React component libraries
-- Runs an explicit ReAct loop (Thought → Action → Observation) with bounded tool iterations
-- Produces a validated, structured ComponentTree (via Zod schema)
-- Stores the plan in AgentMemory for downstream use
-
-**GeneratorAgent** (`src/lib/agents/GeneratorAgent.ts`)
-- Receives the ComponentTree from PlannerAgent
-- Iterates over every component in the tree
-- Uses Groq tool-calling to validate TSX syntax and check accessibility
-- Uses the same bounded ReAct loop pattern for tool-assisted code refinement
-- Streams generated TSX code component by component
-- Stores each result in AgentMemory
-
-**SummarizerAgent** (`src/lib/agents/SummarizerAgent.ts`)
-- Runs after component generation completes
-- Reads `prd_analysis`, `component_tree`, and `library_suggestions` from AgentMemory
-- Produces a structured generation report using model completion
-- Stores the final report in AgentMemory under `generation_summary`
-
-**AgentOrchestrator** (`src/lib/agents/AgentOrchestrator.ts`)
-- Composes PlannerAgent, GeneratorAgent, and SummarizerAgent
-- Passes shared AgentMemory to both agents
-- Emits typed streaming events to the UI: `status`, `tree_ready`, `component_ready`, `done`, `summary_ready`, `error`
-
-### Tool-Calling
-
-Each agent is equipped with tools using the Groq function-calling API:
-
-| Agent | Tool | Purpose |
+| Name | Role | Contribution |
 |---|---|---|
-| PlannerAgent | `validate_prd_quality` | Returns a structured PRD quality report (score, checks, warnings, next actions) |
-| PlannerAgent | `suggest_layout_pattern` | Returns structured layout guidance based on app type and page complexity |
-| PlannerAgent | `search_component_library` | Searches NPM for relevant React libraries and returns top package suggestions |
-| GeneratorAgent | `validate_tsx_syntax` | Checks generated code has valid structure |
-| GeneratorAgent | `check_accessibility` | Verifies aria labels and semantic HTML |
-
-### Memory
-
-**AgentMemory** (`src/lib/agents/AgentMemory.ts`)
-- **Session memory** — stores PRD analysis, component tree, generated codes, and component library suggestions during a session
-- **Persistent memory** — saves PRD history to localStorage (client) and all memory keys to a server-side filesystem store (`.memory-store.json`)
-- Shared instance passed to both agents, enabling inter-agent communication
-
-**Filesystem Memory Store** (`src/lib/memory-store.ts`)
-- Persists agent memory on the server in `.memory-store.json`
-- Supports writing per-key values and reading full memory snapshots across sessions
-
-### Pipeline Flow
-
-```
-User PRD Input
-      │
-      ▼
-PlannerAgent
-  ├── Tool: validate_prd_quality
-  ├── Tool: suggest_layout_pattern
-  ├── Tool: search_component_library
-  ├── Generates ComponentTree (JSON)
-  ├── Stores in AgentMemory["library_suggestions"]
-  └── Stores in AgentMemory["component_tree"]
-      │
-      ▼
-GeneratorAgent
-  ├── Reads ComponentTree from AgentMemory
-  ├── For each component:
-  │     ├── Tool: validate_tsx_syntax
-  │     ├── Tool: check_accessibility
-  │     └── Yields { componentId, componentName, code }
-  └── Stores each in AgentMemory["code_{id}"]
-      │
-      ▼
-SummarizerAgent
-  ├── Reads PRD analysis + component tree + library suggestions from memory
-  ├── Produces developer-facing generation summary
-  └── Stores in AgentMemory["generation_summary"]
-      │
-      ▼
-Streaming API Route (/api/generate)
-      │
-      ▼
-useGenerate Hook (SSE consumer)
-      │
-      ▼
-3-Panel UI (PRD Editor | Tree View | Code Export)
-```
+| Gokul Das | Software Engineer | Contributed to development of the working prototype, including Next.js UI implementation, AI agent integration, and component generation flow; participated in code structuring, feature implementation, and demo preparation |
+| Teenu Jose | Senior Software Engineer | Contributed to working prototype development including AI prompt design, validation logic, and UI refinements; supported code quality and UI improvements, documentation, and demo structuring |
 
 ---
 
-## Tech Stack
+## Tech Stack with Versions
 
-| Technology | Purpose |
-|---|---|
-| Next.js 14 (App Router) | Framework |
-| TypeScript | Type safety |
-| Tailwind CSS | Styling |
-| Groq SDK + Llama 3.3 70B | AI model (free) |
-| Zod | Schema validation |
-| Monaco Editor | PRD input editor |
-| Framer Motion | Animations |
-| React Syntax Highlighter | Code display |
-| JSZip | ZIP export |
-| StackBlitz SDK | Live preview |
-| next-themes | Dark mode |
+| Technology | Version | Purpose |
+|---|---|---|
+| Next.js | 16.2.3 | React framework with App Router |
+| TypeScript | 5.9.3 | Type safety across the codebase |
+| Tailwind CSS | 4.2.2 | Component styling |
+| Groq SDK | 1.1.2 | AI model API client |
+| Llama 3.3 70B | - | Underlying language model (via Groq) |
+| Zod | 4.3.6 | Schema validation for AI outputs |
+| Monaco Editor | 4.7.0 | VS Code-grade PRD input editor |
+| Framer Motion | 12.38.0 | UI animations |
+| React Syntax Highlighter | 16.1.1 | Code display |
+| JSZip | 3.10.1 | ZIP export of generated components |
+| StackBlitz SDK | 1.11.0 | Live component preview |
+| next-themes | 0.4.6 | Dark/light mode |
 
 ---
 
-## Setup Instructions
+## Working Prototype Screenshots
+
+### PRD Input with Monaco Editor
+![PRD Input](./screenshots/01-prd-input.png)
+
+### Live Generation in Progress
+![Generation Running](./screenshots/02-generation-running.png)
+
+### Components Generated — Code Export Panel
+![Components Generated](./screenshots/03-components-generated.png)
+
+### Generated Components Preview
+![Components Generated](./screenshots/04-components-preview.png)
+
+---
+
+## Demo Video
+
+[Watch 8-minute Demo on Loom](https://www.loom.com/share/052d58fba0e54249b57f2c8cb117dfb1)
+
+---
+
+## How to Run Locally
 
 ### Prerequisites
-- Node.js 18+
-- A free Groq API key — get one at [console.groq.com](https://console.groq.com)
+- Node.js 18 or higher
+- A free Groq API key — sign up at [console.groq.com](https://console.groq.com) (no credit card required)
 
-### 1. Clone the repository
+### Step 1 — Clone the repository
 
 ```bash
-git clone https://github.com/GokulDas-07/SpecToUI-Agent.git
+git clone https://github.com/GokulDas-07/thinkpalm-agentai-spectoui-teambeta.git
 cd spectoui
 ```
 
-### 2. Install dependencies
+### Step 2 — Install dependencies
 
 ```bash
 npm install
 ```
 
-### 3. Set up environment variables
+### Step 3 — Set up environment variables
 
 Create a `.env.local` file in the project root:
 
@@ -161,7 +92,7 @@ Create a `.env.local` file in the project root:
 GROQ_API_KEY=your_groq_api_key_here
 ```
 
-### 4. Run the development server
+### Step 4 — Run the development server
 
 ```bash
 npm run dev
@@ -169,13 +100,39 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### 5. Generate your first UI
+### Step 5 — Generate your first UI
 
-1. Click **"Sample"** and select "E-commerce" to load a sample PRD
-2. Click **"Generate UI"**
+1. Click **Sample** and select any sample PRD, or drag and drop your own `.md` or `.txt` file
+2. Click **Generate UI**
 3. Watch the component tree populate in real time
-4. Click components in the right panel to view their code
-5. Click **"Export ZIP"** to download all components
+4. Click any component in the right panel to view its TSX code
+5. Click **Export ZIP** to download all components as a ready-to-use package
+
+---
+
+## How It Works
+
+```
+Your PRD (plain English)
+        │
+        ▼
+  PlannerAgent
+  ├── Reads and understands the PRD
+  ├── Identifies pages, features, user roles
+  └── Produces a typed ComponentTree (JSON)
+        │
+        ▼
+  GeneratorAgent
+  ├── Receives the ComponentTree
+  ├── Generates TSX code for each component
+  └── Streams results one by one to the UI
+        │
+        ▼
+  3-Panel UI
+  ├── Left  — PRD Editor (Monaco)
+  ├── Center — Component Tree View + Preview
+  └── Right  — Code Export + ZIP Download
+```
 
 ---
 
@@ -184,43 +141,54 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ```
 src/
 ├── app/
-│   ├── page.tsx                  # Main 3-panel layout
-│   ├── layout.tsx                # Root layout with theme provider
-│   └── api/generate/route.ts    # Streaming SSE API route
+│   ├── page.tsx                    # Main 3-panel layout
+│   ├── layout.tsx                  # Root layout + theme provider
+│   └── api/generate/route.ts       # Streaming SSE API route
 ├── lib/
 │   ├── agents/
-│   │   ├── AgentMemory.ts       # Session + persistent memory
-│   │   ├── PlannerAgent.ts      # PRD → ComponentTree agent
-│   │   ├── GeneratorAgent.ts    # ComponentTree → TSX agent
-│   │   ├── SummarizerAgent.ts   # Generated output → summary report agent
-│   │   └── AgentOrchestrator.ts # Composes planner, generator, summarizer
-│   ├── prompts.ts               # All AI prompt functions + sample PRDs
-│   └── groq-client.ts           # Groq SDK wrapper with streaming helpers
+│   │   ├── AgentMemory.ts          # Session + persistent memory
+│   │   ├── PlannerAgent.ts         # PRD → ComponentTree
+│   │   ├── GeneratorAgent.ts       # ComponentTree → TSX code
+│   │   └── AgentOrchestrator.ts    # Composes both agents
+│   ├── prompts.ts                  # AI prompt functions + sample PRDs
+│   └── groq-client.ts              # Groq SDK wrapper
 ├── hooks/
-│   └── useGenerate.ts           # SSE consumer hook
+│   └── useGenerate.ts              # SSE streaming consumer hook
 ├── components/
-│   ├── PrdEditor/               # Left panel: Monaco editor + file upload
-│   ├── ComponentPreview/        # Center panel: Tree view + StackBlitz preview
-│   └── CodeExport/              # Right panel: Syntax highlighted code + ZIP export
+│   ├── PrdEditor/                  # Left panel
+│   ├── ComponentPreview/           # Center panel
+│   └── CodeExport/                 # Right panel
 └── types/
-    └── component-tree.ts        # Zod schemas + TypeScript types
+    └── component-tree.ts           # Zod schemas + TypeScript types
+
+docs/
+├── architecture-diagram.png        # System architecture diagram
+└── architecture-writeup.md         # 1-page technical write-up
+
+tests/
+└── pipeline.test.md                # Manual test results
+
+screenshots/
+├── 01-prd-input.png
+├── 02-generation-running.png
+├── 03-components-generated.png
+└── 04-components-preview.png
 ```
 
 ---
 
 ## Key Features
 
-- **Streaming pipeline** — see each component generate in real time via Server-Sent Events
-- **Recursive component tree** — proper parent-child nesting, not a flat list
-- **Tool-calling agents** — agents use function tools to validate and improve output
-- **Post-generation summary** — a final report is generated and streamed after code generation
-- **Session + persistent memory** — history survives page refresh via localStorage
-- **Server-side persistence** — agent memory survives server restarts via filesystem-backed store
-- **Accessible code output** — every generated component includes aria labels and semantic HTML
-- **Export options** — copy individual components or download full ZIP with index.tsx
-- **Sample PRDs** — 3 built-in samples to demo instantly (e-commerce, dashboard, onboarding)
-- **Dark mode** — full light/dark support via next-themes
-- **Rate limiting** — API route protected with 10 requests/minute per IP
+- Real-time streaming — watch components generate one by one via Server-Sent Events
+- Recursive component tree — proper parent-child hierarchy, not a flat list
+- TypeScript throughout — interfaces generated for every component's props
+- Accessible code output — aria labels, semantic HTML, proper roles on every component
+- Mobile-first responsive — sm: md: lg: Tailwind breakpoints on all generated code
+- Sample PRDs built in — E-commerce, SaaS Dashboard, Onboarding flow
+- File upload — drag and drop any .md or .txt PRD file
+- Export options — copy individual components or download full ZIP
+- Dark mode — full light/dark support
+- PRD history — previous generations saved and reloadable
 
 ---
 
@@ -228,17 +196,4 @@ src/
 
 | Variable | Description | Required |
 |---|---|---|
-| `GROQ_API_KEY` | Your Groq API key from console.groq.com | Yes |
-
----
-
-## How the Prompt Engineering Works
-
-The AI pipeline uses 4 specialized prompts in sequence:
-
-1. **System prompt** — establishes the AI as a senior frontend architect
-2. **PRD parse prompt** — extracts structured data (pages, features, user roles) from free-form text
-3. **Component plan prompt** — converts parsed PRD into a typed ComponentTree JSON
-4. **Component code prompt** — generates TSX for each node with TypeScript interfaces, Tailwind classes, and accessibility attributes
-
-Each prompt instructs the model to return only valid JSON or raw TSX — no markdown, no explanation — ensuring reliable parsing.
+| `GROQ_API_KEY` | Free API key from console.groq.com | Yes |
