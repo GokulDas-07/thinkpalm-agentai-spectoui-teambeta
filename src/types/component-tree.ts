@@ -46,23 +46,27 @@ const componentNodeSchema: z.ZodType<ComponentNodeBase> = z.lazy(() =>
     /** Human-readable summary of what this component represents or does. */
     description: z.string(),
     /** Declared props for this component instance. */
-    props: z.array(
-      z.object({
-        /** Prop name as exposed to consumers or in JSX. */
-        name: z.string(),
-        /** TypeScript-style or conceptual type of the prop (for example "string", "ReactNode"). */
-        type: z.string(),
-        /** Whether callers must supply this prop. */
-        required: z.boolean(),
-        /** Optional serialized default when the prop is omitted. */
-        defaultValue: z.string().optional(),
-      }),
-    ),
+    props: z
+      .array(
+        z.object({
+          /** Prop name as exposed to consumers or in JSX. */
+          name: z.string(),
+          /** TypeScript-style or conceptual type of the prop (for example "string", "ReactNode"). */
+          type: z.string(),
+          /** Whether callers must supply this prop. */
+          required: z.boolean(),
+          /** Optional serialized default when the prop is omitted. */
+          defaultValue: z.string().optional(),
+        }),
+      )
+      .default([]),
     /** Tailwind CSS utility classes applied to this component's root element. */
-    tailwindClasses: z.union([
-      z.array(z.string()),
-      z.string().transform(s => s.split(' ').filter(Boolean))
-    ]),
+    tailwindClasses: z
+      .union([
+        z.array(z.string()),
+        z.string().transform((s) => s.split(" ").filter(Boolean)),
+      ])
+      .default([]),
     /** Optional nested child components under this node. */
     children: z.array(componentNodeSchema).optional(),
     /** Optional generated TSX source for this node (filled in a later pipeline stage). */

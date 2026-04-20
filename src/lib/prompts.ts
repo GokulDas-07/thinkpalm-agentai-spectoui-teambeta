@@ -81,7 +81,10 @@ Rules you must follow:
 Return ONLY the JSON object.`;
 }
 
-export function getComponentCodePrompt(componentJson: string, siblingContext: string): string {
+export function getComponentCodePrompt(
+  componentJson: string,
+  siblingContext: string,
+): string {
   return `Generate TypeScript React (TSX) source code for a single component.
 
 Component definition (JSON — this node may include children for context; implement THIS component only):
@@ -94,12 +97,14 @@ Requirements:
 - Define a TypeScript interface for the component props at the top of the file.
 - Use Tailwind CSS classes only; do not use inline styles.
 - Use accessible HTML: semantic elements where appropriate, aria-label (and other ARIA) when needed, and valid roles where appropriate.
-- Export the component as a named export (not default).
+- Export the component as a DEFAULT export (e.g. "export default function ComponentName(...)"). This is CRITICAL.
+- CRITICAL: Components MUST be renderable without props. Use default parameters with realistic mock data for all required props (e.g., "export default function Component({ data = MOCK_DATA })"). This ensures the preview works immediately without parent wiring.
+- CRITICAL: When mapping over data arrays or accessing nested properties, ALWAYS use optional chaining (e.g., "data?.map(...)") or defensive checks to prevent crashes if the data is missing or has a different structure than expected.
 - Use realistic placeholder content (copy, labels, sample list items) so the UI is reviewable.
 - Use mobile-first responsive Tailwind classes, including sm:, md:, and lg: breakpoints where layout benefits from it.
 - Import React explicitly if the file uses JSX that requires it in the target environment (e.g. import React from "react" or the minimal hooks/types you need).
 
-Return ONLY the raw TSX source code. Do not wrap the output in markdown fences. Do not add explanations before or after the code.`;
+CRITICAL: Return ONLY the raw TSX source code. Do not wrap the output in markdown fences. Do not add explanations before or after the code. No conversational filler.`;
 }
 
 export const SAMPLE_PRDS: Record<string, string> = {

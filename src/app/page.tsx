@@ -83,6 +83,7 @@ function MoonIcon() {
 }
 
 export default function Home() {
+  const [mounted, setMounted] = useState(false);
   const [prdText, setPrdText] = useState("");
   const [selectedComponentId, setSelectedComponentId] = useState<string | null>(
     null,
@@ -135,6 +136,10 @@ export default function Home() {
   } = useGenerate();
 
   const { resolvedTheme, setTheme } = useTheme();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (error !== null) {
@@ -309,12 +314,20 @@ export default function Home() {
             className="flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
             onClick={toggleTheme}
             aria-label={
-              resolvedTheme === "dark"
+              mounted && resolvedTheme === "dark"
                 ? "Switch to light mode"
                 : "Switch to dark mode"
             }
           >
-            {resolvedTheme === "dark" ? <SunIcon /> : <MoonIcon />}
+            {mounted ? (
+              resolvedTheme === "dark" ? (
+                <SunIcon />
+              ) : (
+                <MoonIcon />
+              )
+            ) : (
+              <div className="h-4 w-4" />
+            )}
           </button>
         </div>
       </header>

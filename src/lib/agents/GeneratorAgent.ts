@@ -47,11 +47,28 @@ export const GENERATOR_TOOLS = [
 ];
 
 function stripMarkdownFences(text: string): string {
-  const trimmed = text.trim();
-  const match = trimmed.match(
-    /^```(?:tsx|ts|jsx|js|javascript|typescript)?\s*([\s\S]*?)\s*```$/i,
+  // Use a regex that handles both complete and partial (streaming) code blocks.
+  // It captures everything after the first opening fence.
+  const match = text.match(
+    /```(?:tsx|ts|jsx|js|javascript|typescript)?\s*\n?([\s\S]*?)(?:```|$)/i,
   );
-  return match ? match[1].trim() : trimmed;
+  if (match && match[1].trim()) {
+    return match[1].trim();
+  }
+
+  // If no fences, look for the start of common React code markers to skip filler
+  const codeMarkers = ["import ", "export ", "const ", "function "];
+  let minIndex = Infinity;
+  for (const marker of codeMarkers) {
+    const idx = text.indexOf(marker);
+    if (idx !== -1 && idx < minIndex) minIndex = idx;
+  }
+
+  if (minIndex !== Infinity) {
+    return text.slice(minIndex).trim();
+  }
+
+  return text.trim();
 }
 
 function buildSiblingContext(components: ComponentNode[]): string {
@@ -69,8 +86,8 @@ export class GeneratorAgent {
       const code = String(args?.code ?? "");
       const componentName = String(args?.componentName ?? "");
       const issues: string[] = [];
-      if (!code.includes("export")) {
-        issues.push("Missing `export` keyword (expected a named export).");
+      if (!code.includes("export default")) {
+        issues.push("Missing `export default` keyword.");
       }
       if (componentName && !code.includes(componentName)) {
         issues.push(
